@@ -1,0 +1,65 @@
+$lg: lightgray;
+
+* {
+    // outline: 1px gray solid;
+    max-width: 1257px;
+    margin: auto;
+}
+html{
+    height: 100%;
+    box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+body {
+    position: relative;
+    margin: 0;
+    padding-bottom: 6rem;
+    min-height: 100%;
+    background-color: $lg;
+}
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fafafa;
+}
+h1{
+    text-align: center;
+}
+.todo-header{
+    width: 100%;
+    text-align: center;
+}
+.row{
+
+}
+#todos{
+    border: 1px solid gray;
+    padding: 15px;
+    background-color: rgb(226, 224, 224);
+}
+#todos li{
+    padding-left: 0;
+    margin: 15px;
+}
+.todo-completed{
+    text-decoration: line-through;
+}
+.todo-completed button{
+    text-decoration: none;
+}
+.btn{
+    display: inline;
+}
+#theFooter{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1rem;
+}

@@ -1,0 +1,28 @@
+{
+  "name": "todoapp",
+  "version": "1.0.0",
+  "description": "Udemy JavaScript Tutorial To Do App",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ernestdpeterson/ToDoApp.git"
+  },
+  "author": "Ernest D. Peterson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ernestdpeterson/ToDoApp/issues"
+  },
+  "homepage": "https://github.com/ernestdpeterson/ToDoApp#readme",
+  "devDependencies": {
+    "browser-sync": "^2.26.3",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^6.0.0",
+    "gulp-uglify": "^3.0.1"
+  },
+  "dependencies": {
+    "gulp-uglifycss": "^1.1.0"
+  }
+}
