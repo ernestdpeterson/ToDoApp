@@ -1,79 +1,119 @@
-/*eslint-env jquery*/
+/* eslint-env jquery */
+/* global todoService */
 
-var state = {
-    todos: [
-        {id: 1, task: 'Get the training done!', status: true},
-        {id: 2, task: 'Ensure I understand it', status: false},
-        {id: 3, task: 'Be Happy, Don\'t Worry', status: false},
-    ]
-};
 var todoInput = document.getElementById('todo');
 var todoList = document.getElementById('todos');
 var todoApp = {
-    addTodo: function() {
-        let todo = todoInput.value;
-        let newTodo = {
-            id: state.todos.length + 1,
-            task: todo,
-            status: false
-        };
-        state.todos = [...state.todos, newTodo];
-        this.render();
-    },
-    toggleTodos: function(el) {
-        let todoId = el.parentNode.id;
-        let todos = state.todos.map((todo) => {
-            if(todo.id == todoId) {
-                todo.status = !todo.status;
-            }
-            return todo;
-        });
-        state.todos = [...todos];
-        this.render();
-    },
-    removeTodo: function(el) {
-        let todoId = el.parentNode.id;
-
-        let todos = state.todos.filter((todo)=> {
-            return todo.id != todoId;
-        });
-        state.todos = [...todos];
-        this.render();
-    },
-    render: function() {
+    getItemView: function(todoItem)  {
         let someElement = '';
         let btnText = 'complete';
         let btnUndoRedo = '';
         let btnDelete = `
-            <button type='button' onclick='todoApp.removeTodo(this)' class'btn'>Remove Item</button>
+            <button type='button' onclick='todoApp.removeTodo(this, ${todoItem.id})' class'btn'>Remove Item</button>
+        `;
+        let todoItemStyle = '';
+        let buttonUndoRedoText = btnText;
+
+        if (todoItem.status === true) {
+            todoItemStyle = 'todo-completed';
+            buttonUndoRedoText = 'undo';
+        }
+
+        btnUndoRedo = `
+            <button type='button' onclick='todoApp.onToggleTodos(this, ${todoItem.id})' class='btn'>${buttonUndoRedoText}</button>
         `;
 
-        if (state.todos.length === 0) {
-            todoList.innerHTML = 'No Todos yet. Be brave and create some todos :-)';
-            return;
-        } else {
-            for (var todoCounter = 0; todoCounter < state.todos.length; todoCounter++) {
-                let todo = state.todos[todoCounter];
-                let todoItemStyle = '';
-                let buttonUndoRedoText = 'complete';
-
-                if(todo.status === true){
-                    todoItemStyle = 'todo-completed';
-                    buttonUndoRedoText = 'undo';
-                }
-
-                btnUndoRedo = `
-                    <button type='button' onclick='todoApp.toggleTodos(this)' class='btn'>${buttonUndoRedoText}</button>
-                `;
-
-                someElement += `
-                    <li id=${todo.id} class=${todoItemStyle}>
-                        ${state.todos[todoCounter].task}${btnUndoRedo}${btnDelete}
-                    </li>
-                `;
-            }
-            todoList.innerHTML = someElement;
+        someElement += `
+            <li id=${todoItem.id} class=${todoItemStyle}>
+                ${todoItem.task}${btnUndoRedo}${btnDelete}
+            </li>
+        `;
+        if (todoItem.edit) {
+            someElement = `
+                <li id=${todoItem.id} class=${todoItemStyle}>
+                    <input onkeyup='todoApp.onUpdateTodo(event, ${todoItem.id})'
+                        type='text'
+                        value='${todoItem.task}'/>
+                    ${btnUndoRedo}
+                    ${btnDelete}
+                </li>
+            `;
         }
+        return someElement;
+    },
+    parseHtml: function(html) {
+        var t = document.createElement('template');
+        t.innerHTML = html;
+        return t.content.cloneNode(true);
+    },
+    appendElement: function(todo) {
+        var itemView = this.parseHtml(this.getItemView(todo));
+        todoList.appendChild(itemView);
+    },
+    addTodo: function() {
+        let todo = todoInput.value;
+        let newTodo = {
+            task: todo,
+            status: false
+        };
+        todoService.addTodo(newTodo);
+        this.appendElement(newTodo);
+    },
+    updateElement: function(el, todo) {
+        el.outerHTML = this.getItemView(todo);
+    },
+    onToggleTodos: function(el, todoId) {
+        // let todoId = el.parentNode.id; // here 'el' is button. the pareent is the <li> element.
+        let todo = todoService.toggleComplete(todoId);
+        this.updateElement(el.parentNode, todo);
+    },
+    onUpdateTodo: function(event, todoId) {
+        if(event.which == 27) {
+            this.toggleEdit(event.target.parentNode, todoId);
+        } else if (event.which == 13) {
+            todoService.updateTodo(todoId, event.target.value);
+            this.toggleEdit(event.target.parentNode, todoId);
+        }
+    },
+    toggleEdit: function(target, todoId) {
+        let todo = todoService.toggleEdit(todoId);
+        this.updateElement(target, todo);
+    },
+    onToggleEdit: function() {
+        if (event.target.tagName.toLowerCase() != 'li') {return;}
+        let todoId = event.target.id;
+        this.toggleEdit(event.target, todoId);
+    },
+    // toggleTodos: function(el) {
+    //     let todoId = el.parentNode.id;
+    //     let todos = state.todos.map((todo) => {
+    //         if(todo.id == todoId) {
+    //             todo.status = !todo.status;
+    //         }
+    //         return todo;
+    //     });
+    //     state.todos = [...todos];
+    //     this.render();
+    // },
+    removeElement: function(el) {
+        todoList.removeChild(el);
+    },
+    removeTodo: function(el, todoId) {
+        todoService.removeTodo(todoId);
+        this.removeElement(el.parentNode);
+    },
+    render: function() {
+        let html = '';
+        let todos = todoService.getAll();
+
+        if (todos.length === 0) {
+            todoList.innerHTML = 'No todos yet! Be brave and create some work for yourself.';
+            return;
+        }
+        for (var i = 0; i < todos.length; i++) {
+            html += this.getItemView(todos[i]);
+        }
+        todoList.innerHTML = html;
     }
 };
 

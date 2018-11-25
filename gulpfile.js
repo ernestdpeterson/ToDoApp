@@ -34,6 +34,8 @@ var browserSync = require('browser-sync').create();
 var eslint = require('gulp-eslint');
 // npm install gulp-concat
 var concat = require('gulp-concat');
+// npm install --save-dev gulp-babel @babel/core @babel/preset-env
+var babel = require('gulp-babel');
 // npm install --save-dev gulp-uglify
 var uglify = require('gulp-uglify');
 // npm install --save gulp-uglifycss
@@ -42,7 +44,8 @@ var uglifycss = require('gulp-uglifycss');
 gulp.task('default', function(done) {
     gulp.watch('sass/**/*.scss', ['styling']);
     gulp.watch('js/**/*.js', ['lint']);
-    gulp.watch(['index.html', 'js/*.js', 'css/main.css']).on('change', browserSync.reload);
+    gulp.watch('services/**/*.js', ['lint']);
+    gulp.watch(['index.html', 'js/*.js', 'services/*js','css/main.css']).on('change', browserSync.reload);
     browserSync.init({
         server: './'
     });
@@ -67,7 +70,7 @@ gulp.task('styling', function(done) {
 });
 
 gulp.task('lint', function() {
-    return gulp.src(['js/**/*.js'])
+    return gulp.src(['js/**/*.js', 'services/**/*.js'])
         // eslint() attaches the lint output to the eslint property
         // of the file object so it can be used by other modules
         .pipe(eslint())
@@ -89,8 +92,15 @@ gulp.task('Done', function(done) {
         }))
         .pipe(gulp.dest('distribution/css'));
     gulp.src('js/**/*.js')
+        // compile all es6 to es5 before minifying
+        .pipe(babel({presets: ['@babel/env']}))
         .pipe(uglify())
         .pipe(gulp.dest('distribution/js'));
+    gulp.src('services/**/*.js')
+        // compile all es6 to es5 before minifying
+        .pipe(babel({presets: ['@babel/env']}))
+        .pipe(uglify())
+        .pipe(gulp.dest('distribution/services'));
     gulp.src('images/*')
         .pipe((gulp.dest('distribution/images')));
     
