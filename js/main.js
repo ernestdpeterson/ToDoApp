@@ -1,9 +1,29 @@
 /* eslint-env jquery */
-/* global todoService */
+/* global todoService state pagination */
 
 var todoInput = document.getElementById('todo');
 var todoList = document.getElementById('todos');
 var todoApp = {
+    addTodo: function() {
+        let todo = todoInput.value;
+        let newTodo = {
+            task: todo,
+            status: false
+        };
+        todoService.addTodo(newTodo);
+        this.appendElement(newTodo);
+        pagination.render();
+        pagination.gotoLastPage();
+    },
+    appendElement: function(todo) {
+        var itemView = this.parseHtml(this.getItemView(todo));
+        todoList.appendChild(itemView);
+    },
+    parseHtml: function(html) {
+        var t = document.createElement('template');
+        t.innerHTML = html;
+        return t.content.cloneNode(true);
+    },
     getItemView: function(todoItem)  {
         let someElement = '';
         let btnText = 'complete';
@@ -41,27 +61,6 @@ var todoApp = {
         }
         return someElement;
     },
-    parseHtml: function(html) {
-        var t = document.createElement('template');
-        t.innerHTML = html;
-        return t.content.cloneNode(true);
-    },
-    appendElement: function(todo) {
-        var itemView = this.parseHtml(this.getItemView(todo));
-        todoList.appendChild(itemView);
-    },
-    addTodo: function() {
-        let todo = todoInput.value;
-        let newTodo = {
-            task: todo,
-            status: false
-        };
-        todoService.addTodo(newTodo);
-        this.appendElement(newTodo);
-    },
-    updateElement: function(el, todo) {
-        el.outerHTML = this.getItemView(todo);
-    },
     onToggleTodos: function(el, todoId) {
         // let todoId = el.parentNode.id; // here 'el' is button. the pareent is the <li> element.
         let todo = todoService.toggleComplete(todoId);
@@ -75,36 +74,41 @@ var todoApp = {
             this.toggleEdit(event.target.parentNode, todoId);
         }
     },
+    updateElement: function(el, todo) {
+        el.outerHTML = this.getItemView(todo);
+    },
+    onToggleEdit: function() {
+        if(event.target.tagName.toLowerCase() != 'li') return;
+        let todoId = event.target.id;
+        this.toggleEdit(event.target, todoId);
+    },
     toggleEdit: function(target, todoId) {
         let todo = todoService.toggleEdit(todoId);
         this.updateElement(target, todo);
     },
-    onToggleEdit: function() {
-        if (event.target.tagName.toLowerCase() != 'li') {return;}
-        let todoId = event.target.id;
-        this.toggleEdit(event.target, todoId);
-    },
-    // toggleTodos: function(el) {
-    //     let todoId = el.parentNode.id;
-    //     let todos = state.todos.map((todo) => {
-    //         if(todo.id == todoId) {
-    //             todo.status = !todo.status;
-    //         }
-    //         return todo;
-    //     });
-    //     state.todos = [...todos];
-    //     this.render();
-    // },
-    removeElement: function(el) {
-        todoList.removeChild(el);
+    toggleTodos: function(el) {
+        let todoId = el.parentNode.id;
+        let todos = state.todos.map((todo) => {
+            if(todo.id == todoId) {
+                todo.status = !todo.status;
+            }
+            return todo;
+        });
+        state.todos = [...todos];
+        this.render();
     },
     removeTodo: function(el, todoId) {
         todoService.removeTodo(todoId);
         this.removeElement(el.parentNode);
+        pagination.render();
+        pagination.gotoLastPage();
     },
-    render: function() {
+    removeElement: function(el) {
+        todoList.removeChild(el);
+    },
+    render: function(todos) {
         let html = '';
-        let todos = todoService.getAll();
+        // let todos = todoService.getAll();
 
         if (todos.length === 0) {
             todoList.innerHTML = 'No todos yet! Be brave and create some work for yourself.';
@@ -117,5 +121,5 @@ var todoApp = {
     }
 };
 
-$('#theFooter').html('Good Footer').css('text-align','center');
-todoApp.render();
+$('#theFooter').append('Good Footer').css('text-align','center');
+todoApp.render(todoService.getPageData(1, pagination.pageLength));

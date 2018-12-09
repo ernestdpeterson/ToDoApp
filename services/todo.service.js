@@ -4,17 +4,28 @@
 var state = {
     todos: [
         {id: 1, task: 'Get the training done!', status: true, edit: false},
-        {id: 2, task: 'Ensure I understand it', status: false, edit: false},
-        {id: 3, task: 'Be Happy, Don\'t Worry', status: false, edit: false},
+        {id: 2, task: 'Ensure that I understand it', status: false, edit: false},
+        {id: 3, task: 'Don\'t Worry, Be Happy', status: false, edit: false},
     ]
 };
+
+for (var i = 4; i <= 50; i++) {
+    state.todos.push({
+        id: i,
+        task: 'Some Random Task ' + i,
+        status: false,
+        edit: false
+    });
+}
 
 var todoService = {
     getAll: function() {
         return state.todos;
     },
     addTodo: function(newTodo) {
-        newTodo.id = state.todos.length + 1;
+        // newTodo.id = state.todos.length + 1;
+        let maxId = Math.max.apply(Math, state.todos.map((todo)=>{return todo.id;}));
+        newTodo.id = maxId + 1;
         state.todos = [...state.todos, newTodo];
     },
     updateTodo: function(todoId, value) {
@@ -49,5 +60,14 @@ var todoService = {
         });
         state.todos = [...todos];
         return currentTodo;
+    },
+    getTodosCount: function() {
+        return state.todos.length;
+    },
+    getPageData: function(pageNo, pageLength) {
+        let startOfRecord = (pageNo - 1) * pageLength;
+        let endOfRecord = startOfRecord + pageLength;
+        let pageData = state.todos.slice(startOfRecord, endOfRecord);
+        return pageData;
     }
 };

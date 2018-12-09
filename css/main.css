@@ -14,12 +14,18 @@ h1 { text-align: center; }
 
 #todos { border: 1px solid gray; padding: 15px; background-color: #e2e0e0; }
 
-#todos li { padding-left: 0; margin: 15px; }
+#todos li { padding-left: 0; margin: 15px; list-style-type: none; }
 
 .todo-completed { text-decoration: line-through; }
 
 .todo-completed button { text-decoration: none; }
 
 .btn { display: inline; }
+
+.current-page { background-color: skyblue; color: black; }
+
+.pagination-btn.first, .pagination-btn.last { background-color: lightcoral; color: black; }
+
+.pagination-btn.next, .pagination-btn.prev { background-color: #688c9a6b; color: darkred; }
 
 #theFooter { position: absolute; left: 0; right: 0; bottom: 0; padding: 1rem; }
